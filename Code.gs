@@ -6,9 +6,9 @@
 
 // 시트 탭별 열 구성: [코드에서 쓰는 이름, 시트 머리글]
 const SCHEMA = {
-  '회원': [['id','ID'],['name','이름'],['gender','성별'],['birthYear','출생 연도'],['job','직업·생활 환경'],['regCount','등록 횟수'],
-          ['monthGoal','이번 달 목표'],['purpose','운동 목적'],['freq','운동 빈도'],['sleep','수면 패턴'],['diet','식습관'],['alcohol','음주 습관'],
-          ['medical','병력 및 약물'],['special','특이사항'],['caution','주의사항'],['painArea','제일 불편한 부위'],['painMove','제일 불편한 동작'],
+  '회원': [['id','ID'],['name','이름'],['gender','성별'],['birthYear','출생 연도'],['job','직업·생활 환경'],['regCount','등록 횟수'],['visit','방문경로'],
+          ['monthGoal','이번 달 목표'],['purpose','운동 목적'],['freq','운동 빈도'],['sleep','수면 패턴'],['diet','식습관'],
+          ['medical','부상 및 병력'],['special','특이사항'],['caution','주의사항'],['painArea','제일 불편한 부위'],['painMove','제일 불편한 동작'],
           ['breathing','호흡'],['createdAt','만든 시각'],['updatedAt','수정 시각']],
   '수업': [['id','ID'],['memberId','회원 ID'],['date','날짜'],['no','회차'],['memo','수업 메모'],['updatedAt','수정 시각']],
   '세트': [['sessionId','수업 ID'],['memberId','회원 ID'],['date','날짜'],['exOrder','운동 순서'],['exercise','운동'],['note','추가 메모'],['part','부위'],
@@ -19,6 +19,9 @@ const SCHEMA = {
   '운동목록': [['name','운동'],['part','부위']],
   '설정': [['key','항목'],['valueJson','값(JSON)']]
 };
+
+// 예전 머리글 → 지금 머리글 (기획 변경으로 이름이 바뀐 열)
+const HEADER_ALIASES = { '병력 및 약물': '부상 및 병력' };
 
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('index')
@@ -37,8 +40,39 @@ function sheet_(name) {
     const labels = SCHEMA[name].map(function (c) { return c[1]; });
     sh.getRange(1, 1, 1, labels.length).setValues([labels]).setFontWeight('bold').setBackground('#e9eef5');
     sh.setFrozenRows(1);
+  } else {
+    migrateHeaders_(sh, name);
   }
   return sh;
+}
+
+// 시트의 열 구성이 SCHEMA와 다르면(예: 방문경로 추가, 음주 습관 삭제) 열을 SCHEMA 순서로 다시 맞춥니다.
+// SCHEMA에 없는 예전 열(예: 음주 습관)은 지우지 않고 오른쪽 끝에 그대로 남겨 둡니다.
+const migrated_ = {};
+function migrateHeaders_(sh, name) {
+  if (migrated_[name]) return;
+  migrated_[name] = true;
+  const labels = SCHEMA[name].map(function (c) { return c[1]; });
+  const lastCol = Math.max(sh.getLastColumn(), 1);
+  const head = sh.getRange(1, 1, 1, lastCol).getDisplayValues()[0]
+    .map(function (h) { h = String(h).trim(); return HEADER_ALIASES[h] || h; });
+  while (head.length && head[head.length - 1] === '') head.pop();
+  const same = labels.every(function (l, i) { return head[i] === l; });
+  if (same) return;
+  const extras = head.filter(function (h) { return h && labels.indexOf(h) < 0; });
+  const newHead = labels.concat(extras);
+  const n = sh.getLastRow() - 1;
+  const old = n > 0 ? sh.getRange(2, 1, n, head.length).getDisplayValues() : [];
+  const rows = old.map(function (r) {
+    return newHead.map(function (h) { const k = head.indexOf(h); return k >= 0 ? r[k] : ''; });
+  });
+  sh.getRange(1, 1, Math.max(n + 1, 1), Math.max(lastCol, newHead.length)).clearContent();
+  sh.getRange(1, 1, 1, newHead.length).setValues([newHead]).setFontWeight('bold').setBackground('#e9eef5');
+  if (rows.length) {
+    const rg = sh.getRange(2, 1, rows.length, newHead.length);
+    rg.setNumberFormat('@');
+    rg.setValues(rows);
+  }
 }
 
 function readRows_(name) {
@@ -178,6 +212,19 @@ function saveSession(s) {
     });
     const sh = sheet_('세트');
     writeRows_(sh, sh.getLastRow() + 1, rows);
+    return true;
+  });
+}
+
+// 수업을 지운 뒤 뒤 회차를 당길 때: [{id, no}, ...] 의 회차만 고칩니다.
+function renumberSessions(list) {
+  return withLock_(function () {
+    const sh = sheet_('수업');
+    const col = keys_('수업').indexOf('no') + 1;
+    (list || []).forEach(function (x) {
+      const r = findRow_(sh, String(x.id));
+      if (r > 0) sh.getRange(r, col).setNumberFormat('@').setValue(String(x.no));
+    });
     return true;
   });
 }

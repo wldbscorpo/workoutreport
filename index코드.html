@@ -97,25 +97,41 @@ button.chip{min-height:30px}
 .mhead-top{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
 .mhead-name{font-size:22px;font-weight:800;letter-spacing:-.02em}
 .mhead-sub{font-size:13.5px;color:var(--ink-2)}
-.mhead-goals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.goal-box{border-radius:10px;padding:8px 12px;font-size:14px;line-height:1.45;background:var(--accent-soft)}
-.goal-box b{display:block;font-size:12px;color:var(--accent);margin-bottom:1px}
-.goal-box.warn{background:var(--warn-soft)}
-.goal-box.warn b{color:var(--warn)}
-@media (max-width:720px){.mhead-goals{grid-template-columns:1fr}.mhead{position:static}}
+.mhead-facts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fact{display:inline-flex;align-items:baseline;gap:6px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:15px;font-weight:700;white-space:nowrap}
+.fact small{font-size:12px;font-weight:600;color:var(--ink-3)}
+.fact.empty-v{font-weight:500;color:var(--ink-3)}
+@media (max-width:760px){.mhead{position:static}}
 .tabs{display:flex;gap:2px;overflow-x:auto;margin-top:10px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{border:0;background:none;padding:12px 14px;font-weight:600;font-size:15px;color:var(--ink-2);border-bottom:2.5px solid transparent;white-space:nowrap}
 .tab.on{color:var(--accent);border-bottom-color:var(--accent)}
 
 /* session layout */
-.sess{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}
-.ref{position:sticky;top:238px;max-height:calc(100vh - 252px);overflow:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:6px}
-@media (max-width:980px){.sess{grid-template-columns:1fr}.ref{position:static;max-height:none}}
-.ref-toggle{display:none}
-@media (max-width:980px){.ref-toggle{display:flex}.ref.collapsed{display:none}}
+.sess{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start;margin-bottom:-110px}
+.sess>.entry{padding-bottom:110px}
+.ref{position:sticky;top:var(--ref-top,190px);height:calc(100vh - var(--ref-top,190px) - 12px);display:flex;flex-direction:column;gap:12px}
+.ref-fixed{flex:0 0 auto;max-height:64%;overflow:auto;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.ref-scroll{flex:1 1 0;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:6px;overscroll-behavior:contain}
+@media (max-width:980px){.sess{grid-template-columns:280px minmax(0,1fr)}}
+@media (max-width:760px){.sess{grid-template-columns:1fr;margin-bottom:0}.sess>.entry{padding-bottom:0}.ref{position:static;height:auto}.ref-fixed,.ref-scroll{max-height:none;overflow:visible}}
 .ref .card{padding:14px 16px}
 .ref h4{font-size:14px;color:var(--ink-2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.binfo{display:flex;flex-direction:column;gap:5px;padding:8px!important}
+.bi{border-left:5px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:5px 10px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.bi b{font-size:11.5px;font-weight:800;color:#000;margin-right:6px;white-space:nowrap}
+.bi.c2{border-left-color:#5b7b6a;background:#eef4f0}
+.bi.c3{border-left-color:#9a7b3c;background:#f7f2e7}
+.bi.warn{border-left-color:#c0392b;background:#fdecea;color:#b0261a;font-weight:700}
+.bi.warn b{color:#000}
+.bi .none{color:var(--ink-3);font-weight:400}
+.evals{font-size:13px;line-height:1.45}
+.evals .eh{font-size:12px;font-weight:700;color:var(--ink-3);margin-bottom:4px}
+.evals .er{display:flex;gap:6px;align-items:baseline;padding:2px 0;border-top:1px dashed var(--line)}
+.evals .er:first-of-type{border-top:0}
+.evals .er .tn{font-weight:700;white-space:nowrap}
+.evals .er .lv{flex:none;font-size:11.5px;padding:0 6px}
+.evals .er .nt{color:var(--ink-2);word-break:break-word}
 .kv{display:grid;grid-template-columns:76px 1fr;gap:4px 10px;font-size:14px}
 .kv dt{color:var(--ink-3);font-weight:600;font-size:13px}
 .kv dd{margin:0;white-space:pre-wrap;word-break:break-word}
@@ -145,7 +161,19 @@ button.chip{min-height:30px}
 .draft-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff8e6;border:1px solid #f0e0b5;border-radius:10px;padding:10px 14px;font-size:14px;color:#6a5521}
 
 .ex{padding:12px 14px 12px;position:relative}
-.ex.focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,58,95,.08)}
+.ex.open{border:2px solid var(--accent);box-shadow:0 0 0 3px rgba(31,58,95,.08)}
+#exList{display:flex;flex-direction:column;gap:8px}
+.ex-mini{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 14px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-s);box-shadow:var(--shadow)}
+.ex-mini:hover{border-color:var(--accent-2)}
+.ex-mini .mn{font-weight:700;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%}
+.ex-mini .mn.none{color:var(--ink-3);font-weight:500}
+.ex-mini .ms{flex:1;min-width:0;font-size:13.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-mini .mv{font-size:13.5px;color:var(--ink-2);white-space:nowrap}
+.ex-mini .mv b{color:var(--ink)}
+.prev-load{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0 38px;padding:8px 10px;border:1px dashed var(--accent-2);border-radius:10px;background:#f5f8fc;font-size:13.5px}
+.prev-load .pv{flex:1;min-width:160px;color:var(--ink-2)}
+.prev-load .pv b{color:var(--ink)}
+@media (max-width:980px){.prev-load{margin-left:0}.ex-mini .mn{max-width:50%}}
 .ex-head{display:grid;grid-template-columns:30px minmax(0,1.6fr) minmax(0,1fr) auto auto 40px;gap:8px;align-items:center}
 .ex-idx{width:28px;height:28px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--ink-2)}
 .ex-name{font-weight:700;font-size:17px}
@@ -181,12 +209,12 @@ button.chip{min-height:30px}
 .seg button.on{background:var(--accent);color:#fff}
 .timer-btn{flex:none;width:46px;min-height:46px;border-radius:10px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:15px;font-weight:700}
 .inl-hist{display:none}
-@media (max-width:980px){.ex.focus .inl-hist{display:block}}
+@media (max-width:760px){.ex.open .inl-hist{display:block}}
 .ih-box{margin:10px 0 0 38px;background:var(--accent-soft);border-radius:10px;padding:8px 12px;font-size:14px;line-height:1.6}
 .ih-box b{font-size:12.5px;color:var(--accent);margin-right:8px}
-@media (max-width:620px){.ih-box{margin-left:0}}
+@media (max-width:980px){.ih-box{margin-left:0}}
 .ex-foot{display:flex;gap:8px;margin:8px 0 0 38px}
-@media (max-width:620px){
+@media (max-width:980px){
   .ex-head{grid-template-columns:28px minmax(0,1fr) auto;grid-template-areas:"i n d" ". m m" ". p v"}
   .ex-head>.ex-idx{grid-area:i}.ex-head>.ac-wrap.name{grid-area:n}.ex-head>.ac-wrap.note{grid-area:m}.ex-head>.partcell{grid-area:p}.ex-head>.ex-vol{grid-area:v}.ex-head>.icon-btn{grid-area:d}
   .sets,.ex-foot,.part-picker{margin-left:0}
@@ -337,7 +365,7 @@ const DEFAULT_BANDS = [
   {lv:7,color:'금색',kg:10,hex:'#c9a43e'}
 ];
 const DEFAULT_TESTS = ['토마스','아담스','흉추회전','광배길이','대흉근','소흉근','하부승모','전거근','딥스쿼트','하체유연성','푸쉬업','풀다운견갑'];
-const LEVELS = ['정상','제한','미실시'];
+const LEVELS = ['정상','제한'];
 const NOTE_SUGGEST = ['밴드1','밴드2','밴드3','밴드4','블럭','볼','보수','메디신볼','슬라이더','스미스','케이블','덤벨','바벨','원레그','원암','원핸드','행잉','+스트레칭','+pnf','+흉추','전사','좌측','우측','범위 작게'];
 const CATALOG_SRC = {
   '하체':'스쿼트,퍼펙트 스쿼트,행잉 스쿼트,스플릿 스쿼트,사이드 스플릿 스쿼트,불가리안 스플릿 스쿼트,케이블 로우 스쿼트,TRX 스쿼트,고블릿 스쿼트,런지,백 런지,사이드 런지,레그 프레스,레그 익스텐션,레그 컬,힙 브릿지,원레그 힙 브릿지,힙 쓰러스트,힙 어덕션,힙 에이비덕션,크램쉘,카프 레이즈,카프 토 레이즈,데드리프트,루마니안 데드리프트,원레그 데드리프트,원레그 스티프 데드리프트,굿모닝,리버스 노르딕,스텝 다운,원레그 슬라이더,발등 굴곡 운동,발목 굴곡 운동,프론트 레그레이즈,사이드 레그레이즈',
@@ -397,7 +425,7 @@ function gasCall(fn,...args){
 function persistLocal(){ store(LOCAL_KEY, JSON.stringify(DB)); }
 
 const API = {};
-['saveMember','deleteMember','saveSession','deleteSession','saveInbody','deleteInbody','saveAssessment','deleteAssessment','saveCatalog','saveSettings','renameExercise'].forEach(fn=>{
+['saveMember','deleteMember','saveSession','deleteSession','renumberSessions','saveInbody','deleteInbody','saveAssessment','deleteAssessment','saveCatalog','saveSettings','renameExercise'].forEach(fn=>{
   API[fn] = async (...args)=>{
     setSaveState('saving');
     try{
@@ -517,7 +545,7 @@ function memberExercises(mid){
 /* =========================================================
    상태
    ========================================================= */
-const state = {view:'members', memberId:null, tab:'session', q:'', drafts:{}, focusEx:null, refOpen:false,
+const state = {view:'members', memberId:null, tab:'session', q:'', drafts:{}, focusEx:null, openEx:null,
   trend:{preset:'3m',from:'',to:'',ex:''}, hist:{ex:''}, evalEdit:null, cmp:{a:'',b:''}, report:{from:'',to:'',comment:''}, catQ:''};
 const member = () => DB.members.find(m=>m.id===state.memberId);
 
@@ -583,7 +611,7 @@ function viewMembers(){
   ${rows.length?`<div class="member-grid">${rows.map(r=>`
     <button class="member-card" data-act="openMember" data-id="${r.m.id}">
       <span class="name">${esc(r.m.name)}</span>
-      <span class="purpose">${esc(r.m.purpose||'운동 목적 미입력')}</span>
+      <span class="purpose">${r.m.purpose?esc(r.m.purpose):r.m.visit?'방문경로 · '+esc(r.m.visit):'운동 목적 미입력'}</span>
       <span class="meta"><span>최근 수업 ${r.last?fmtDate(r.last):'없음'}</span><span class="num">${r.no}회차${r.m.regCount?` / 등록 ${r.m.regCount}회`:''}</span></span>
     </button>`).join('')}</div>`
   : `<div class="card empty">${DB.members.length?'검색 결과가 없습니다.':'등록된 회원이 없습니다. <b>+ 새 회원</b>을 눌러 시작하세요.'+(IS_GAS?'':'<br><br>테스트용 샘플 회원이 필요하면 설정 → 데이터에서 <b>샘플 데이터 넣기</b>를 누르세요.')}</div>`}`;
@@ -598,22 +626,32 @@ function viewMemberShell(){
     <div class="mhead-top">
       <div style="flex:1;min-width:200px">
         <div class="mhead-name">${esc(m.name)} <span style="font-weight:500;font-size:16px" class="muted">회원님</span></div>
-        <div class="mhead-sub num">${no}회차 완료${m.regCount?` · 등록 ${m.regCount}회`:''}${ss[0]?` · 최근 수업 ${fmtDate(ss[0].date)}`:''}</div>
+        <div class="mhead-sub num">${ss[0]?`최근 수업 ${fmtDate(ss[0].date)}`:'아직 수업 기록 없음'}</div>
       </div>
-    </div>
-    <div class="mhead-goals">
-      <div class="goal-box"><b>이번 달 목표</b>${esc(m.monthGoal||'—')}</div>
-      <div class="goal-box warn"><b>주의사항</b>${esc(m.caution||'—')}</div>
+      <div class="mhead-facts">
+        <span class="fact num"><small>회차</small>${no}${m.regCount?` / ${m.regCount}회`:' / <span class="faint" style="font-weight:500">등록 미입력</span>'}</span>
+        ${factHTML('운동 빈도',m.freq)}
+        ${factHTML('방문경로',m.visit)}
+      </div>
     </div>
     <nav class="tabs">${TABS.map(([k,l])=>`<button class="tab ${state.tab===k?'on':''}" data-act="tab" data-tab="${k}">${l}</button>`).join('')}</nav>
   </div></div>
   <div id="tabBody"></div>`;
 }
+function factHTML(label,v){ v=String(v||'').trim(); return `<span class="fact ${v?'':'empty-v'}"><small>${label}</small>${v?esc(v):'미입력'}</span>`; }
+// 회원 헤더 높이에 맞춰 좌측 고정 영역의 위치를 잡습니다.
+function syncRefTop(){
+  const mh=$('.mhead'), tb=$('.topbar'); if(!mh) return;
+  const top=(tb?tb.offsetHeight:58)+mh.offsetHeight+10;
+  document.documentElement.style.setProperty('--ref-top',top+'px');
+}
+window.addEventListener('resize',()=>syncRefTop());
 function renderTab(){
   const body=$('#tabBody'); if(!body) return;
   const t=state.tab;
   body.innerHTML = t==='session'?viewSession(): t==='history'?viewHistory(): t==='trend'?viewTrend(): t==='inbody'?viewInbody(): t==='info'?viewInfo(): viewReport();
   if(t==='report') drawReportPreview();
+  syncRefTop();
 }
 
 /* ---------- 수업 기록 ---------- */
@@ -637,34 +675,73 @@ function markDirty(){
   draftTimer=setTimeout(()=>{ const c=clone(d); delete c.restored; store(draftKey(d.memberId),JSON.stringify(c)); },350);
 }
 
+function setUnitLabel(st){
+  const w=weightLabel(st);
+  if(st.mode==='time') return (w?w+' ':'')+fmtSec(st.sec);
+  return w? `${w}×${st.reps||'-'}` : `${st.reps||'-'}회`;
+}
+// 같은 값이 이어지는 세트는 묶어서 "30kg×12(1세트) / 35kg×10(2세트)"처럼 표시
+function groupedSets(sets){
+  const out=[];
+  for(const st of sets.filter(setFilled)){
+    const l=setUnitLabel(st); const last=out[out.length-1];
+    if(last&&last.l===l) last.n++; else out.push({l,n:1});
+  }
+  return out.map(g=>`${g.l}(${g.n}세트)`).join(' / ');
+}
+function infoBlockHTML(m){
+  const item=(label,v,cls)=>{ v=String(v||'').trim(); return `<div class="bi ${cls}"><b>${label}</b>${v?esc(v):'<span class="none">입력 없음</span>'}</div>`; };
+  return `<div class="card binfo">
+    ${item('운동 목적',m.purpose,'')}
+    ${item('부상 및 병력',m.medical,'c2')}
+    ${item('특이사항',m.special,'c3')}
+    ${item('주의사항',m.caution,'warn')}
+  </div>`;
+}
+function evalHasValue(it){ return it && (it.level || String(it.note||'').trim()); }
+function latestEval(mid){
+  const evs=memberEvals(mid);
+  for(let k=evs.length-1;k>=0;k--){ const a=evs[k]; if(Object.keys(a.items||{}).some(t=>evalHasValue(a.items[t]))) return a; }
+  return null;
+}
+function evalBlockHTML(m){
+  const a=latestEval(m.id);
+  if(!a) return `<div class="card evals"><div class="eh">평가 테스트</div><div class="faint">입력 없음</div></div>`;
+  const order=tests().concat(Object.keys(a.items).filter(t=>!tests().includes(t)));
+  const rows=order.filter(t=>evalHasValue(a.items[t])).map(t=>{const it=a.items[t]; return `<div class="er"><span class="tn">${esc(t)}</span>${it.level?`<span class="lv ${esc(it.level)}">${esc(it.level)}</span>`:''}${String(it.note||'').trim()?`<span class="nt">${esc(it.note)}</span>`:''}</div>`;}).join('');
+  return `<div class="card evals"><div class="eh">평가 테스트 · ${fmtDate(a.date)}</div>${rows}</div>`;
+}
+function recentBlockHTML(m,d){
+  const recent=memberSessions(m.id).filter(s=>s.id!==d.id).slice(0,3);
+  if(!recent.length) return `<div class="card"><div class="faint" style="font-size:14px">지난 수업이 없습니다.</div></div>`;
+  return `<div class="card">${recent.map(s=>{const st=sessionStats(s);return `
+    <div class="recent-item">
+      <div class="rh"><span>${fmtDate(s.date)} · ${s.no}회차</span><span class="num">${fmtNum(st.vol)}kg</span></div>
+      <ul>${s.exercises.map(ex=>`<li><span class="n">${esc(ex.name)}${ex.note?` <span class="faint">(${esc(ex.note)})</span>`:''}</span><span class="s">${esc(groupedSets(ex.sets))}</span></li>`).join('')}</ul>
+      ${s.memo?`<div class="memo-line" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.memo.split('\n')[0])}</div>`:''}
+    </div>`;}).join('')}</div>`;
+}
+function autoOpenEx(d){
+  if(state.openEx!=null && state.openEx<d.exercises.length) return;
+  const k=d.exercises.findIndex(ex=>!String(ex.name||'').trim());
+  state.openEx = k>=0 ? k : null;
+  state.focusEx = state.openEx;
+}
+
 function viewSession(){
   const m=member(), d=getDraft();
-  const recent=memberSessions(m.id).filter(s=>s.id!==d.id).slice(0,3);
+  autoOpenEx(d);
   const editing = d.id ? DB.sessions.find(s=>s.id===d.id) : null;
   return `
-  <button class="btn ref-toggle" data-act="toggleRef" style="margin-bottom:12px;width:100%">${state.refOpen?'참고 정보 접기 ▲':'회원 정보 · 지난 기록 보기 ▼'}</button>
   <div class="sess">
-    <aside class="ref ${state.refOpen?'':'collapsed'}">
-      <div id="exHist">${refHistoryHTML()}</div>
-      <div class="card">
-        <h4>회원 정보 <button class="btn sm ghost" data-act="tab" data-tab="info">수정</button></h4>
-        <dl class="kv" style="margin:0">
-          <dt>운동 목적</dt><dd>${esc(m.purpose||'—')}</dd>
-          <dt>운동 빈도</dt><dd>${esc(m.freq||'—')}</dd>
-          <dt>병력·약물</dt><dd>${esc(m.medical||'—')}</dd>
-          <dt>특이사항</dt><dd>${esc(m.special||'—')}</dd>
-          <dt>불편 부위</dt><dd>${esc([m.painArea,m.painMove].filter(Boolean).join(' / ')||'—')}</dd>
-          <dt>주의사항</dt><dd class="warn">${esc(m.caution||'—')}</dd>
-        </dl>
+    <aside class="ref">
+      <div class="ref-fixed">
+        ${infoBlockHTML(m)}
+        ${evalBlockHTML(m)}
       </div>
-      <div class="card">
-        <h4>최근 수업 ${recent.length?'':'<span class="faint" style="font-weight:500">없음</span>'}</h4>
-        ${recent.map(s=>{const st=sessionStats(s);return `
-          <div class="recent-item">
-            <div class="rh"><span>${fmtDate(s.date)} · ${s.no}회차</span><span class="num">${fmtNum(st.vol)}kg</span></div>
-            <ul>${s.exercises.map(ex=>`<li><span class="n">${esc(ex.name)}${ex.note?` <span class="faint">(${esc(ex.note)})</span>`:''}</span><span class="s">${esc(setsSummary(ex.sets))}</span></li>`).join('')}</ul>
-            ${s.memo?`<div class="memo-line">${esc(s.memo)}</div>`:''}
-          </div>`;}).join('')}
+      <div class="ref-scroll">
+        ${recentBlockHTML(m,d)}
+        <div id="exHist">${refHistoryHTML()}</div>
       </div>
     </aside>
     <section class="entry">
@@ -692,9 +769,33 @@ function viewSession(){
     </section>
   </div>`;
 }
+function exMiniHTML(ex,i){
+  const st=exStats(ex); const name=String(ex.name||'').trim(); const sum=setsSummary(ex.sets);
+  return `<button class="ex-mini" id="ex-${i}" data-act="openEx" data-ex="${i}">
+    <span class="ex-idx">${i+1}</span>
+    <span class="mn ${name?'':'none'}">${name?esc(name):'운동 이름 미입력'}</span>
+    ${name&&ex.part?partChip(ex.part):''}
+    ${ex.note?`<span class="chip note">${esc(ex.note)}</span>`:''}
+    <span class="ms">${esc(sum)}</span>
+    <span class="mv num">${(st.vol||st.bodyReps||st.sec)?exVolHTML(st):''}</span>
+  </button>`;
+}
+// 지난번 세트 불러오기: 같은 회원, 같은 이름(띄어쓰기·대소문자 무시)의 가장 최근 기록
+function prevSource(ex){
+  const d=getDraft(); if(!String(ex.name||'').trim()) return null;
+  let hs=exHistory(state.memberId,ex.name,d.id);
+  if(d.id) hs=hs.filter(h=>h.s.date<d.date || (h.s.date===d.date && (+h.s.no||0)<(+d.no||0)));
+  return hs.find(h=>h.ex.sets.some(setFilled))||null;
+}
+function prevLoadHTML(ex,i){
+  const h=prevSource(ex); if(!h) return '';
+  return `<div class="prev-load"><span class="pv"><b>${fmtDate(h.s.date)}</b> · ${h.s.no}회차${h.ex.note?` · <span class="chip note">${esc(h.ex.note)}</span>`:''}<br>${esc(groupedSets(h.ex.sets))}</span>
+    <button class="btn sm" data-act="loadPrev" data-ex="${i}">↺ 지난번 세트 불러오기</button></div>`;
+}
 function exCardHTML(ex,i){
+  if(state.openEx!==i) return exMiniHTML(ex,i);
   const st=exStats(ex);
-  return `<div class="card ex ${state.focusEx===i?'focus':''}" id="ex-${i}" data-ex="${i}">
+  return `<div class="card ex open" id="ex-${i}" data-ex="${i}">
     <div class="ex-head">
       <span class="ex-idx">${i+1}</span>
       <div class="ac-wrap name"><input class="input ex-name" data-f="name" data-ex="${i}" value="${esc(ex.name)}" placeholder="운동 이름" autocomplete="off" enterkeyhint="next"><div class="ac hidden" id="ac-${i}"></div></div>
@@ -705,8 +806,9 @@ function exCardHTML(ex,i){
     </div>
     ${ex._picker?partPickerHTML(ex,i):''}
     <div class="inl-hist" id="ih-${i}">${state.focusEx===i?inlineHistHTML(ex):''}</div>
+    <div id="pl-${i}">${prevLoadHTML(ex,i)}</div>
     <div class="sets">${ex.sets.map((s,j)=>setRowHTML(s,i,j)).join('')}</div>
-    <div class="ex-foot"><button class="btn sm" data-act="addSet" data-ex="${i}">+ 세트</button></div>
+    <div class="ex-foot"><button class="btn sm" data-act="addSet" data-ex="${i}">+ 세트</button><span style="flex:1"></span><button class="btn sm primary" data-act="nextEx" data-ex="${i}">다음 운동 →</button></div>
   </div>`;
 }
 function exVolHTML(st){
@@ -778,9 +880,17 @@ function rerenderEx(i){ const d=getDraft(); const el=$('#ex-'+i); if(el) el.oute
 function rerenderExList(){ const d=getDraft(); const el=$('#exList'); if(el) el.innerHTML=d.exercises.map((ex,i)=>exCardHTML(ex,i)).join(''); updateTotals(); }
 function setFocusEx(i){
   if(state.focusEx===i) return;
-  $$('.ex.focus').forEach(e=>e.classList.remove('focus'));
-  state.focusEx=i; const el=$('#ex-'+i); if(el) el.classList.add('focus');
+  state.focusEx=i;
   refreshRefHistory();
+}
+// 카드 하나만 펼치기
+function openExCard(i,focusName){
+  state.openEx=i; state.focusEx=i; hideAC();
+  rerenderExList(); refreshRefHistory();
+  const el=$('#ex-'+i); if(!el) return;
+  const top=el.getBoundingClientRect().top;
+  if(top<(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ref-top'))||150) || top>window.innerHeight*0.6) el.scrollIntoView({block:'start',behavior:'smooth'});
+  if(focusName){ const n=$(`#ex-${i} [data-f="name"]`); if(n && !n.value) n.focus({preventScroll:true}); }
 }
 function autoPart(ex){ if(ex.partManual) return; const c=catalogFind(ex.name); ex.part=c?c.part:''; }
 
@@ -1060,10 +1170,10 @@ function viewInbody(){
 
 /* ---------- 기본 정보·상담 ---------- */
 const INFO_GROUPS=[
-  ['기본 정보',[['name','이름','input'],['gender','성별','input'],['birthYear','출생 연도','input'],['job','직업·생활 환경','input'],['regCount','등록 횟수','num']]],
+  ['기본 정보',[['name','이름','input'],['regCount','등록 횟수','num'],['visit','방문경로','input'],['gender','성별','input'],['birthYear','출생 연도','input'],['job','직업·생활 환경','input']]],
   ['목표',[['monthGoal','이번 달 목표','text'],['purpose','운동 목적','text'],['freq','운동 빈도','input']]],
-  ['생활 습관',[['sleep','수면 패턴','text'],['diet','식습관','text'],['alcohol','음주 습관','text']]],
-  ['건강',[['medical','병력 및 약물','text'],['special','특이사항','text'],['caution','주의사항','text']]],
+  ['생활 습관',[['sleep','수면 패턴','text'],['diet','식습관','text']]],
+  ['건강',[['medical','부상 및 병력','text'],['special','특이사항','text'],['caution','주의사항','text']]],
   ['증상',[['painArea','제일 불편한 부위','input'],['painMove','제일 불편한 동작','input'],['breathing','호흡','input']]]
 ];
 function memberEvals(mid){ return DB.assessments.filter(a=>a.memberId===mid).sort((a,b)=>a.date.localeCompare(b.date)); }
@@ -1080,7 +1190,7 @@ function viewInfo(){
       <div class="row" style="margin-top:16px;justify-content:space-between"><button class="btn danger sm" data-act="delMember">회원 삭제</button><button class="btn primary" data-act="saveInfo">정보 저장</button></div>
     </div>
     <div class="card card-pad">
-      <div class="section-title"><h3>평가 테스트 <span class="faint num" style="font-weight:500;font-size:15px">${evs.length}회</span></h3>${ee?'':`<button class="btn sm primary" data-act="newEval">${evs.length?'+ 재평가':'+ 평가 기록'}</button>`}</div>
+      <div class="section-title"><h3>평가 테스트 <span class="faint num" style="font-weight:500;font-size:15px">${evs.length}회</span></h3>${ee?'':`<button class="btn sm primary" data-act="newEval">${evs.length?'재평가 추가':'+ 평가 기록'}</button>`}</div>
       ${ee?evalEditorHTML(ee):''}
       ${!ee&&evs.length?`<div class="tbl-wrap"><table class="tbl"><tbody>${evs.slice().reverse().map((a,k)=>`<tr><td><b>${fmtDate(a.date)}</b> ${a===evs[0]?'<span class="chip">최초</span>':''}</td><td class="muted" style="font-size:13.5px">${tests().map(t=>a.items[t]&&a.items[t].level==='제한'?esc(t):null).filter(Boolean).join(', ')?'제한: '+tests().map(t=>a.items[t]&&a.items[t].level==='제한'?esc(t):null).filter(Boolean).join(', '):''}</td><td class="r" style="white-space:nowrap"><button class="btn sm" data-act="editEval" data-id="${a.id}">보기·수정</button></td></tr>`).join('')}</tbody></table></div>`:''}
       ${!ee&&!evs.length?`<div class="empty">평가 기록이 없습니다.</div>`:''}
@@ -1282,28 +1392,38 @@ const ACT = {
   home(){ go('members'); },
   settings(){ go('settings'); },
   newMember(){
-    openModal(`<h3>새 회원</h3><div class="stack"><div class="field"><label>이름</label><input class="input" id="nm-name" placeholder="이름"></div><div class="field"><label>등록 횟수</label><input class="input" id="nm-reg" inputmode="numeric" placeholder="예: 20"></div></div>
+    openModal(`<h3>새 회원</h3><div class="stack"><div class="field"><label>이름</label><input class="input" id="nm-name" placeholder="이름"></div><div class="field"><label>등록 횟수</label><input class="input" id="nm-reg" inputmode="numeric" placeholder="예: 20"></div><div class="field"><label>방문경로</label><input class="input" id="nm-visit" placeholder="예: 지인 소개, 인스타그램, 네이버 검색"></div></div>
       <div class="actions"><button class="btn" data-act="modal-cancel">취소</button><button class="btn primary" data-act="modal-ok">만들기</button></div>`, async ok=>{
       if(!ok) return;
       const name=$('#nm-name').value.trim(); if(!name){ toast('이름을 입력하세요.','err'); return false; }
-      const mm={id:uid(),name,regCount:+$('#nm-reg').value||'',createdAt:new Date().toISOString()};
+      const mm={id:uid(),name,regCount:+$('#nm-reg').value||'',visit:$('#nm-visit').value.trim(),createdAt:new Date().toISOString()};
       DB.members.push(mm); closeModal();
       try{ await API.saveMember(mm); }catch(e){}
       go('member',{memberId:mm.id,tab:'info'});
     });
   },
-  openMember(t){ state.focusEx=null; state.evalEdit=null; state.hist.ex=''; state.trend.ex=''; state.report={from:'',to:'',comment:''}; go('member',{memberId:t.dataset.id,tab:'session'}); },
-  tab(t){ state.tab=t.dataset.tab; state.evalEdit=null; $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab)); renderTab(); },
-  toggleRef(){ state.refOpen=!state.refOpen; renderTab(); },
+  openMember(t){ state.focusEx=null; state.openEx=null; state.evalEdit=null; state.hist.ex=''; state.trend.ex=''; state.report={from:'',to:'',comment:''}; go('member',{memberId:t.dataset.id,tab:'session'}); },
+  tab(t){ state.tab=t.dataset.tab; state.evalEdit=null; if(state.tab==='session'){ state.openEx=null; state.focusEx=null; } $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab)); renderTab(); },
   'modal-ok': async ()=>{ const cb=modalCb; if(!cb){ closeModal(); return; } const r=await cb(true); if(r!==false && modalCb===cb) closeModal(); },
   'modal-cancel'(){ const cb=modalCb; closeModal(); if(cb) cb(false); },
   'modal-bg'(t,e){ if(e.target===t){ const cb=modalCb; closeModal(); if(cb) cb(false); } },
 
   /* 수업 기록 */
-  addEx(){ const d=getDraft(); d.exercises.push(emptyEx()); markDirty(); rerenderExList(); const i=d.exercises.length-1; const el=$(`#ex-${i} [data-f="name"]`); if(el){ el.focus(); el.scrollIntoView({block:'center',behavior:'smooth'}); } },
+  addEx(){ const d=getDraft(); d.exercises.push(emptyEx()); markDirty(); openExCard(d.exercises.length-1,true); },
+  openEx(t){ openExCard(+t.dataset.ex,true); },
+  nextEx(t){ const d=getDraft(); const i=+t.dataset.ex; if(i>=d.exercises.length-1){ d.exercises.push(emptyEx()); markDirty(); } openExCard(i+1,true); },
+  async loadPrev(t){ const d=getDraft(); const i=+t.dataset.ex; const ex=d.exercises[i]; const h=prevSource(ex); if(!h) return;
+    if(ex.sets.some(setFilled) && !(await confirmBox(`이미 입력한 세트가 있습니다. ${fmtDate(h.s.date)} 기록으로 덮어쓸까요?`,'덮어쓰기',true))) return;
+    ex.sets=h.ex.sets.filter(setFilled).map(st=>({w:st.w||'',mode:st.mode==='time'?'time':'reps',reps:st.mode==='time'?'':String(st.reps??''),sec:st.mode==='time'?String(st.sec??''):''}));
+    if(!ex.sets.length) ex.sets=[emptySet()];
+    if(!String(ex.note||'').trim() && h.ex.note) ex.note=h.ex.note;
+    if(!ex.part && h.ex.part){ ex.part=h.ex.part; }
+    markDirty(); rerenderEx(i); updateTotals(); toast(`${fmtDate(h.s.date)} 세트를 불러왔습니다.`); },
   async delEx(t){ const d=getDraft(); const i=+t.dataset.ex; const ex=d.exercises[i];
     if((ex.name||ex.sets.some(setFilled)) && !(await confirmBox(`「${ex.name||'이 운동'}」을(를) 오늘 기록에서 지울까요?`,'지우기',true))) return;
-    d.exercises.splice(i,1); if(state.focusEx===i) state.focusEx=null; markDirty(); rerenderExList(); refreshRefHistory(); },
+    d.exercises.splice(i,1);
+    const fix=k=>k==null?null:(k===i?(d.exercises.length?Math.min(i,d.exercises.length-1):null):(k>i?k-1:k));
+    state.openEx=fix(state.openEx); state.focusEx=state.openEx; markDirty(); rerenderExList(); refreshRefHistory(); },
   addSet(t){ const d=getDraft(); const i=+t.dataset.ex; const ex=d.exercises[i]; const last=ex.sets[ex.sets.length-1]; ex.sets.push(emptySet(last?last.mode:'reps')); markDirty(); rerenderEx(i); updateTotals(); },
   delSet(t){ const d=getDraft(); const i=+t.dataset.ex, j=+t.dataset.set; const ex=d.exercises[i]; if(ex.sets.length<=1){ ex.sets[0]=emptySet(); } else ex.sets.splice(j,1); markDirty(); rerenderEx(i); updateTotals(); },
   copySet(t){ const d=getDraft(); const i=+t.dataset.ex, j=+t.dataset.set; const ex=d.exercises[i]; if(j<1) return; const a=ex.sets[j-1]; ex.sets[j]={w:a.w,mode:a.mode,reps:a.reps,sec:a.sec}; markDirty(); rerenderEx(i); updateTotals(); },
@@ -1315,8 +1435,8 @@ const ACT = {
   setPart(t){ const d=getDraft(); const i=+t.dataset.ex; const ex=d.exercises[i]; ex.part=t.dataset.part; ex.partManual=true; ex._picker=false; markDirty(); rerenderEx(i); },
   acPick(t){ pickAC(+t.dataset.ex,t.dataset.k,t.dataset.v); },
   saveSession(){ commitSession(); },
-  async newSession(){ const d=getDraft(); if(d.dirty && !(await confirmBox('저장하지 않은 입력이 있습니다. 지우고 새 수업을 시작할까요?','새로 시작',true))) return; state.drafts[state.memberId]=newDraft(state.memberId); store(draftKey(state.memberId),null); state.focusEx=null; renderTab(); },
-  async discardDraft(){ if(!(await confirmBox('불러온 입력을 버리고 새 수업을 시작할까요?','버리기',true))) return; state.drafts[state.memberId]=newDraft(state.memberId); store(draftKey(state.memberId),null); state.focusEx=null; renderTab(); },
+  async newSession(){ const d=getDraft(); if(d.dirty && !(await confirmBox('저장하지 않은 입력이 있습니다. 지우고 새 수업을 시작할까요?','새로 시작',true))) return; state.drafts[state.memberId]=newDraft(state.memberId); store(draftKey(state.memberId),null); state.focusEx=null; state.openEx=null; renderTab(); },
+  async discardDraft(){ if(!(await confirmBox('불러온 입력을 버리고 새 수업을 시작할까요?','버리기',true))) return; state.drafts[state.memberId]=newDraft(state.memberId); store(draftKey(state.memberId),null); state.focusEx=null; state.openEx=null; renderTab(); },
   timer(t){ openTimer(+t.dataset.ex,+t.dataset.set); },
   timerClose(){ stopTimerLoop(); timer.running=false; timer.i=null; renderTimer(); },
   timerPreset(t){ if(timer.running) return; timer.target=+t.dataset.v; timer.elapsed=0; timer.done=false; renderTimer(); },
@@ -1332,11 +1452,16 @@ const ACT = {
   /* 지난 기록 */
   async editSession(t){ const s=DB.sessions.find(x=>x.id===t.dataset.id); if(!s) return; const d=getDraft();
     if(d.dirty && d.id!==s.id && !(await confirmBox('저장하지 않은 오늘 입력이 있습니다. 지우고 이 수업을 열까요?','열기',true))) return;
-    const nd=clone(s); nd.dirty=false; nd.exercises.forEach(ex=>ex.partManual=!!ex.part); state.drafts[state.memberId]=nd; store(draftKey(state.memberId),null); state.focusEx=null; state.tab='session'; render(); },
+    const nd=clone(s); nd.dirty=false; nd.exercises.forEach(ex=>ex.partManual=!!ex.part); state.drafts[state.memberId]=nd; store(draftKey(state.memberId),null); state.focusEx=null; state.openEx=null; state.tab='session'; render(); },
   async delSession(t){ const s=DB.sessions.find(x=>x.id===t.dataset.id); if(!s) return;
     if(!(await confirmBox(`${fmtDate(s.date)} (${s.no}회차) 수업 기록을 삭제할까요? 되돌릴 수 없습니다.`,'삭제',true))) return;
-    DB.sessions=DB.sessions.filter(x=>x.id!==s.id); const d=state.drafts[state.memberId]; if(d&&d.id===s.id) delete state.drafts[state.memberId];
-    try{ await API.deleteSession(s.id); }catch(e){} renderTab(); toast('삭제했습니다.'); },
+    DB.sessions=DB.sessions.filter(x=>x.id!==s.id); const d=state.drafts[state.memberId]; if(d&&d.id===s.id){ delete state.drafts[state.memberId]; store(draftKey(state.memberId),null); }
+    // 회차 자동 정리: 지운 수업보다 뒤 회차를 1씩 당김
+    const delNo=+s.no||0; const moved=[];
+    if(delNo>0) for(const x of DB.sessions) if(x.memberId===s.memberId && (+x.no||0)>delNo){ x.no=(+x.no)-1; moved.push({id:x.id,no:x.no}); }
+    const dr=state.drafts[state.memberId];
+    if(dr && delNo>0 && (+dr.no||0)>delNo){ dr.no=(+dr.no)-1; if(!dr.id) markDirty(); }
+    try{ await API.deleteSession(s.id); if(moved.length) await API.renumberSessions(moved); }catch(e){} render(); toast(moved.length?`삭제했습니다. 뒤 회차 ${moved.length}개를 1씩 당겼습니다.`:'삭제했습니다.'); },
 
   /* 변화 추이 */
   trendPreset(t){ state.trend.preset=t.dataset.v; if(t.dataset.v==='custom'&&!state.trend.from){ const r={to:today()}; state.trend.to=r.to; state.trend.from=addMonths(r.to,-1);} renderTab(); },
@@ -1463,7 +1588,7 @@ document.addEventListener('input',e=>{
     if(f==='date') d.date=t.value; else if(f==='no') d.no=t.value; else if(f==='memo') d.memo=t.value;
     else{
       const i=+t.dataset.ex; const ex=d.exercises[i];
-      if(f==='name'){ ex.name=t.value; ex.partManual=false; autoPart(ex); const pc=$('#part-'+i); if(pc) pc.innerHTML=partCellHTML(ex,i); showAC(i,'name'); refreshRefHistory(); }
+      if(f==='name'){ ex.name=t.value; ex.partManual=false; autoPart(ex); const pc=$('#part-'+i); if(pc) pc.innerHTML=partCellHTML(ex,i); showAC(i,'name'); refreshRefHistory(); const pl=$('#pl-'+i); if(pl) pl.innerHTML=prevLoadHTML(ex,i); }
       else if(f==='note'){ ex.note=t.value; showAC(i,'note'); }
       else{ const j=+t.dataset.set; const st=ex.sets[j]; st[f]=t.value; if(f==='w'){ delete st.kg; delete st.band; }
         const sv=$(`#sv-${i}-${j}`); if(sv) sv.innerHTML=setVolHTML(st);
@@ -1501,7 +1626,7 @@ window.addEventListener('beforeunload',e=>{ const d=state.memberId&&state.drafts
    ========================================================= */
 function addSample(){
   const mid=uid();
-  DB.members.push({id:mid,name:'김샘플',gender:'여',birthYear:'1968',job:'식당 운영 (오래 서서 일함)',regCount:30,monthGoal:'고관절 기능 강화와 스트레칭, 무릎은 천천히 접근',purpose:'건강 - 무릎, 허리 통증 개선',freq:'주 2회',sleep:'6시간, 자주 깸',diet:'불규칙, 저녁 늦게 식사',alcohol:'주 1회 소량',medical:'좌측 무릎 관절염 2기 (통증 3년)',special:'좌측 햄스트링·내전근 긴장, 둔근 약화',caution:'깊게 앉았다 일어날 때 좌측 무릎 오금 통증, 허리 뻐근함',painArea:'좌측 무릎',painMove:'계단 내려가기',breathing:'흉식 호흡 우세',createdAt:new Date().toISOString()});
+  DB.members.push({id:mid,name:'김샘플',gender:'여',birthYear:'1968',job:'식당 운영 (오래 서서 일함)',regCount:30,monthGoal:'고관절 기능 강화와 스트레칭, 무릎은 천천히 접근',purpose:'건강 - 무릎, 허리 통증 개선',freq:'주 2회',sleep:'6시간, 자주 깸',diet:'불규칙, 저녁 늦게 식사',visit:'지인 소개',medical:'좌측 무릎 관절염 2기 (통증 3년)',special:'좌측 햄스트링·내전근 긴장, 둔근 약화',caution:'깊게 앉았다 일어날 때 좌측 무릎 오금 통증, 허리 뻐근함',painArea:'좌측 무릎',painMove:'계단 내려가기',breathing:'흉식 호흡 우세',createdAt:new Date().toISOString()});
   const plan=[
     ['힙 브릿지','','하체',(k)=>[[10+k*2.5,15],[10+k*2.5,15],[10+k*2.5,12]]],
     ['힙 에이비덕션','밴드2','하체',(k)=>[['빨강',17],['빨강',16],['빨강',15]]],
