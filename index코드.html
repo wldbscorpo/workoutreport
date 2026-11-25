@@ -113,7 +113,7 @@ button.chip{min-height:30px}
 .ref{position:sticky;top:var(--ref-top,190px);height:calc(100vh - var(--ref-top,190px) - 12px);display:flex;flex-direction:column;gap:12px}
 .ref-fixed{flex:0 0 auto;max-height:64%;overflow:auto;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
 .ref-scroll{flex:1 1 0;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:6px;overscroll-behavior:contain}
-@media (max-width:980px){.sess{grid-template-columns:280px minmax(0,1fr)}}
+@media (max-width:1200px){.sess{grid-template-columns:300px minmax(0,1fr)}}
 @media (max-width:760px){.sess{grid-template-columns:1fr;margin-bottom:0}.sess>.entry{padding-bottom:0}.ref{position:static;height:auto}.ref-fixed,.ref-scroll{max-height:none;overflow:visible}}
 .ref .card{padding:14px 16px}
 .ref h4{font-size:14px;color:var(--ink-2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
@@ -351,6 +351,40 @@ button.chip{min-height:30px}
   .totals .btn.lg{min-height:44px;padding:0 16px}
   .mhead-inner{padding:12px 14px 0}
 }
+/* 운동 카드 2열: 펼친 카드 2개를 나란히, 나머지는 2열 요약 */
+#exList.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start}
+#exList.two .ex{padding:10px 10px 12px;min-width:0}
+#exList.two>*{min-width:0}
+#exList.two .prev-load,#exList.two .prev-load .pv{min-width:0;max-width:100%}
+#exList .ex.open:not(.cur){border-color:#b7c4d6;box-shadow:none}
+#exList.two .ex-head{grid-template-columns:26px minmax(0,1fr) auto 32px;grid-template-areas:"i n p d" "m m v v";row-gap:6px;column-gap:6px}
+#exList.two .ex-head .input{min-height:44px;padding:8px 10px}
+#exList.two .ex-head>.icon-btn{width:32px}
+#exList.two .ex-head>.ex-idx{grid-area:i}#exList.two .ex-head>.ac-wrap.name{grid-area:n}#exList.two .ex-head>.ac-wrap.note{grid-area:m}#exList.two .ex-head>.partcell{grid-area:p}#exList.two .ex-head>.ex-vol{grid-area:v}#exList.two .ex-head>.icon-btn{grid-area:d}
+#exList.two .ex-name{font-size:16px}
+#exList.two .sets,#exList.two .ex-foot,#exList.two .part-picker,#exList.two .prev-load,#exList.two .ih-box{margin-left:0}
+#exList.two .prev-load{flex-direction:column;align-items:stretch;gap:6px;padding:6px 8px;margin-top:8px}
+#exList.two .prev-load .pv{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#exList.two .prev-load .pv br{display:none}
+#exList.two .prev-load .pv .chip{display:none}
+#exList.two .sets{margin-top:8px}
+#exList.two .set-row{grid-template-columns:16px minmax(0,1fr) auto auto 28px 28px;grid-template-areas:"no w seg cnt copy del";gap:4px;padding:0;border:0}
+#exList.two .set-row .vol{display:none}
+#exList.two .wcell .input{padding:8px 6px;font-size:15px}
+#exList.two .band-btn{min-width:36px;padding:0 2px;font-size:12px}
+#exList.two .seg button{padding:0 9px;font-size:0}
+#exList.two .seg button:not(.on){display:none}
+#exList.two .seg{border-color:var(--accent)}
+#exList.two .seg button::after{content:attr(data-s);font-size:13.5px}
+#exList.two .cnt .input{width:48px;padding:8px 2px;font-size:15px}
+#exList.two .timer-btn{width:34px}
+#exList.two .icon-btn.copy,#exList.two .icon-btn.del{width:26px}
+#exList.two .set-row{grid-template-columns:16px minmax(0,1fr) auto auto 26px 26px}
+#exList.two .ex-foot .btn{flex:1}
+#exList.two .ex-foot span{display:none}
+#exList.two .ex-mini{flex-wrap:wrap;row-gap:2px;align-items:center}
+#exList.two .ex-mini .mn{max-width:none;flex:1}
+#exList.two .ex-mini .ms{order:5;flex:1 0 100%;padding-left:38px}
 .loading{display:grid;place-items:center;min-height:60vh;color:var(--ink-3)}
 </style>
 </head>
@@ -747,8 +781,20 @@ function autoOpenEx(d){
   state.focusEx = state.openEx;
 }
 
+// 오른쪽 입력 영역이 충분히 넓으면(약 600px 이상) 운동 카드를 2열로 놓습니다.
+function calcTwoCol(){
+  const vw=window.innerWidth; if(vw<=760) return false;
+  const entry=Math.min(vw,1280)-40-(vw>1200?340:300)-16;
+  return entry>=600;
+}
+function isOpenEx(i){
+  if(state.openEx==null) return false;
+  return state.twoCol ? Math.floor(i/2)===Math.floor(state.openEx/2) : i===state.openEx;
+}
+window.addEventListener('resize',()=>{ if(state.view==='member'&&state.tab==='session'){ const t=calcTwoCol(); if(t!==state.twoCol){ state.twoCol=t; rerenderExList(); } } });
 function viewSession(){
   const m=member(), d=getDraft();
+  state.twoCol=calcTwoCol();
   autoOpenEx(d);
   const editing = d.id ? DB.sessions.find(s=>s.id===d.id) : null;
   return `
@@ -772,7 +818,7 @@ function viewSession(){
         <span style="flex:1"></span>
         <button class="btn ghost sm" data-act="newSession">새 수업 시작</button>
       </div>
-      <div id="exList">${d.exercises.map((ex,i)=>exCardHTML(ex,i)).join('')}</div>
+      <div id="exList" class="${state.twoCol?'two':''}">${d.exercises.map((ex,i)=>exCardHTML(ex,i)).join('')}</div>
       <button class="btn" data-act="addEx" style="align-self:flex-start">+ 운동 추가</button>
       <div class="card card-pad">
         <div class="field"><label>수업 메모 <span class="faint" style="font-weight:500">· 트레이너만 봅니다 (보고서 제외)</span></label>
@@ -808,13 +854,13 @@ function prevSource(ex){
 }
 function prevLoadHTML(ex,i){
   const h=prevSource(ex); if(!h) return '';
-  return `<div class="prev-load"><span class="pv"><b>${fmtDate(h.s.date)}</b> · ${h.s.no}회차${h.ex.note?` · <span class="chip note">${esc(h.ex.note)}</span>`:''}<br>${esc(groupedSets(h.ex.sets))}</span>
+  return `<div class="prev-load"><span class="pv"><b>${fmtDate(h.s.date)}</b> · ${h.s.no}회차${h.ex.note?` · <span class="chip note">${esc(h.ex.note)}</span>`:''} <br>${esc(groupedSets(h.ex.sets))}</span>
     <button class="btn sm" data-act="loadPrev" data-ex="${i}">↺ 지난번 세트 불러오기</button></div>`;
 }
 function exCardHTML(ex,i){
-  if(state.openEx!==i) return exMiniHTML(ex,i);
+  if(!isOpenEx(i)) return exMiniHTML(ex,i);
   const st=exStats(ex);
-  return `<div class="card ex open" id="ex-${i}" data-ex="${i}">
+  return `<div class="card ex open ${state.openEx===i?'cur':''}" id="ex-${i}" data-ex="${i}">
     <div class="ex-head">
       <span class="ex-idx">${i+1}</span>
       <div class="ac-wrap name"><input class="input ex-name" data-f="name" data-ex="${i}" value="${esc(ex.name)}" placeholder="운동 이름" autocomplete="off" enterkeyhint="next"><div class="ac hidden" id="ac-${i}"></div></div>
@@ -852,7 +898,7 @@ function setRowHTML(s,i,j){
   return `<div class="set-row" id="set-${i}-${j}">
     <span class="no">${j+1}</span>
     <div class="wcell"><input class="input" data-f="w" data-ex="${i}" data-set="${j}" value="${esc(s.w)}" placeholder="무게 kg · 밴드" autocomplete="off"><button class="band-btn" data-act="bandMenu" data-ex="${i}" data-set="${j}">밴드</button></div>
-    <div class="seg"><button class="${time?'':'on'}" data-act="mode" data-mode="reps" data-ex="${i}" data-set="${j}">횟수</button><button class="${time?'on':''}" data-act="mode" data-mode="time" data-ex="${i}" data-set="${j}">시간</button></div>
+    <div class="seg"><button class="${time?'':'on'}" data-act="mode" data-mode="reps" data-s="회" data-ex="${i}" data-set="${j}">횟수</button><button class="${time?'on':''}" data-act="mode" data-mode="time" data-s="초" data-ex="${i}" data-set="${j}">시간</button></div>
     <div class="cnt">${time
       ?`<input class="input num" inputmode="numeric" data-f="sec" data-ex="${i}" data-set="${j}" value="${esc(s.sec)}" placeholder="초"><button class="timer-btn" data-act="timer" data-ex="${i}" data-set="${j}" title="타이머" aria-label="타이머">▶</button>`
       :`<input class="input num" inputmode="numeric" data-f="reps" data-ex="${i}" data-set="${j}" value="${esc(s.reps)}" placeholder="회">`}</div>
@@ -896,10 +942,12 @@ function updateTotals(){
   if(a){a.textContent=fmtNum(vol)+'kg'; b.textContent=reps+'회'; c.textContent=fmtSec(sec);}
 }
 function rerenderEx(i){ const d=getDraft(); const el=$('#ex-'+i); if(el) el.outerHTML=exCardHTML(d.exercises[i],i); }
-function rerenderExList(){ const d=getDraft(); const el=$('#exList'); if(el) el.innerHTML=d.exercises.map((ex,i)=>exCardHTML(ex,i)).join(''); updateTotals(); }
+function rerenderExList(){ const d=getDraft(); const el=$('#exList'); if(el) el.classList.toggle('two',!!state.twoCol); if(el) el.innerHTML=d.exercises.map((ex,i)=>exCardHTML(ex,i)).join(''); updateTotals(); }
+function markCur(i){ state.openEx=i; $$('#exList .ex.open').forEach(e=>e.classList.toggle('cur',e.id==='ex-'+i)); }
 function setFocusEx(i){
   if(state.focusEx===i) return;
   state.focusEx=i;
+  if(isOpenEx(i)) markCur(i);
   refreshRefHistory();
 }
 // 카드 하나만 펼치기
@@ -1430,7 +1478,10 @@ const ACT = {
   /* 수업 기록 */
   addEx(){ const d=getDraft(); d.exercises.push(emptyEx()); markDirty(); openExCard(d.exercises.length-1,true); },
   openEx(t){ openExCard(+t.dataset.ex,true); },
-  nextEx(t){ const d=getDraft(); const i=+t.dataset.ex; if(i>=d.exercises.length-1){ d.exercises.push(emptyEx()); markDirty(); } openExCard(i+1,true); },
+  nextEx(t){ const d=getDraft(); const i=+t.dataset.ex; const j=i+1;
+    if(j>=d.exercises.length){ d.exercises.push(emptyEx()); markDirty(); }
+    if(isOpenEx(j) && $('#ex-'+j+'.open')){ markCur(j); state.focusEx=null; setFocusEx(j); const n=$(`#ex-${j} [data-f="name"]`); if(n){ n.focus({preventScroll:true}); } return; }
+    openExCard(j,true); },
   async loadPrev(t){ const d=getDraft(); const i=+t.dataset.ex; const ex=d.exercises[i]; const h=prevSource(ex); if(!h) return;
     if(ex.sets.some(setFilled) && !(await confirmBox(`이미 입력한 세트가 있습니다. ${fmtDate(h.s.date)} 기록으로 덮어쓸까요?`,'덮어쓰기',true))) return;
     ex.sets=h.ex.sets.filter(setFilled).map(st=>({w:st.w||'',mode:st.mode==='time'?'time':'reps',reps:st.mode==='time'?'':String(st.reps??''),sec:st.mode==='time'?String(st.sec??''):''}));
@@ -1446,7 +1497,7 @@ const ACT = {
   addSet(t){ const d=getDraft(); const i=+t.dataset.ex; const ex=d.exercises[i]; const last=ex.sets[ex.sets.length-1]; ex.sets.push(emptySet(last?last.mode:'reps')); markDirty(); rerenderEx(i); updateTotals(); },
   delSet(t){ const d=getDraft(); const i=+t.dataset.ex, j=+t.dataset.set; const ex=d.exercises[i]; if(ex.sets.length<=1){ ex.sets[0]=emptySet(); } else ex.sets.splice(j,1); markDirty(); rerenderEx(i); updateTotals(); },
   copySet(t){ const d=getDraft(); const i=+t.dataset.ex, j=+t.dataset.set; const ex=d.exercises[i]; if(j<1) return; const a=ex.sets[j-1]; ex.sets[j]={w:a.w,mode:a.mode,reps:a.reps,sec:a.sec}; markDirty(); rerenderEx(i); updateTotals(); },
-  mode(t){ const d=getDraft(); const i=+t.dataset.ex, j=+t.dataset.set; const st=d.exercises[i].sets[j]; if(st.mode===t.dataset.mode) return; st.mode=t.dataset.mode; markDirty(); rerenderEx(i); updateTotals(); },
+  mode(t){ const d=getDraft(); const i=+t.dataset.ex, j=+t.dataset.set; const st=d.exercises[i].sets[j]; if(st.mode===t.dataset.mode){ if(!state.twoCol) return; st.mode=st.mode==='time'?'reps':'time'; } else st.mode=t.dataset.mode; markDirty(); rerenderEx(i); updateTotals(); },
   bandMenu(t){ const i=t.dataset.ex, j=t.dataset.set;
     openPop(t, bands().map(b=>`<button data-act="bandPick" data-ex="${i}" data-set="${j}" data-v="${esc(b.color)}"><span><span class="swatch" style="background:${b.hex||'#ccc'}"></span>${esc(b.color)} <span class="faint">${b.lv}단계</span></span><span class="faint num">${b.kg}kg</span></button>`).join('')); },
   bandPick(t){ const d=getDraft(); const i=+t.dataset.ex, j=+t.dataset.set; const st=d.exercises[i].sets[j]; st.w=t.dataset.v; delete st.kg; delete st.band; closePop(); markDirty(); rerenderEx(i); updateTotals(); const n=$(`[data-ex="${i}"][data-set="${j}"][data-f="${st.mode==='time'?'sec':'reps'}"]`); if(n) n.focus(); },
