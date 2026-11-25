@@ -143,6 +143,21 @@ button.chip{min-height:30px}
 .recent-item li{display:flex;gap:8px;padding:1px 0}
 .recent-item li .n{flex:none;max-width:52%;color:var(--ink)}
 .recent-item li .s{color:var(--ink-2);word-break:break-all}
+.rs{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.rs+.rs{margin-top:10px}
+.rs-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;background:var(--accent);color:#fff;font-size:13.5px;font-weight:700}
+.rs-h .v{font-size:13px;font-weight:600;color:#dbe4f0}
+.rt{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.rt td{padding:6px 8px;border-top:1px solid var(--line);vertical-align:top}
+.rt tr:first-child td{border-top:0}
+.rt tr:nth-child(even) td{background:var(--surface-2)}
+.rt td.n{width:38%;font-weight:700;color:var(--ink);word-break:keep-all;overflow-wrap:anywhere}
+.rt td.n .k{display:inline-block;min-width:16px;color:var(--ink-3);font-weight:700;font-size:11.5px}
+.rt td.n .chip{margin-top:3px;font-size:11px;padding:1px 6px}
+.rt .ssw{display:flex;flex-wrap:wrap;gap:4px}
+.sp{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line-2);background:var(--surface);border-radius:6px;padding:1px 6px;font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sp i{font-style:normal;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:0 4px}
+.rs .memo-line{margin:0;border-radius:0;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .memo-line{margin-top:6px;font-size:13px;background:#fff8e6;border-radius:8px;padding:6px 9px;color:#6a5521;white-space:pre-wrap}
 .hist-card{border:1.5px solid var(--accent)!important}
 .hist-table{width:100%;border-collapse:collapse;font-size:13.5px}
@@ -681,14 +696,15 @@ function setUnitLabel(st){
   return w? `${w}×${st.reps||'-'}` : `${st.reps||'-'}회`;
 }
 // 같은 값이 이어지는 세트는 묶어서 "30kg×12(1세트) / 35kg×10(2세트)"처럼 표시
-function groupedSets(sets){
+function setGroups(sets){
   const out=[];
   for(const st of sets.filter(setFilled)){
     const l=setUnitLabel(st); const last=out[out.length-1];
     if(last&&last.l===l) last.n++; else out.push({l,n:1});
   }
-  return out.map(g=>`${g.l}(${g.n}세트)`).join(' / ');
+  return out;
 }
+function groupedSets(sets){ return setGroups(sets).map(g=>`${g.l}(${g.n}세트)`).join(' / '); }
 function infoBlockHTML(m){
   const item=(label,v,cls)=>{ v=String(v||'').trim(); return `<div class="bi ${cls}"><b>${label}</b>${v?esc(v):'<span class="none">입력 없음</span>'}</div>`; };
   return `<div class="card binfo">
@@ -715,10 +731,13 @@ function recentBlockHTML(m,d){
   const recent=memberSessions(m.id).filter(s=>s.id!==d.id).slice(0,3);
   if(!recent.length) return `<div class="card"><div class="faint" style="font-size:14px">지난 수업이 없습니다.</div></div>`;
   return `<div class="card">${recent.map(s=>{const st=sessionStats(s);return `
-    <div class="recent-item">
-      <div class="rh"><span>${fmtDate(s.date)} · ${s.no}회차</span><span class="num">${fmtNum(st.vol)}kg</span></div>
-      <ul>${s.exercises.map(ex=>`<li><span class="n">${esc(ex.name)}${ex.note?` <span class="faint">(${esc(ex.note)})</span>`:''}</span><span class="s">${esc(groupedSets(ex.sets))}</span></li>`).join('')}</ul>
-      ${s.memo?`<div class="memo-line" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.memo.split('\n')[0])}</div>`:''}
+    <div class="rs">
+      <div class="rs-h"><span>${fmtDate(s.date)} · ${s.no}회차</span><span class="v num">총 ${fmtNum(st.vol)}kg</span></div>
+      <table class="rt"><tbody>${s.exercises.map((ex,k)=>`<tr>
+        <td class="n"><span class="k">${k+1}</span>${esc(ex.name)}${ex.note?`<br><span class="chip note">${esc(ex.note)}</span>`:''}</td>
+        <td class="ss"><div class="ssw">${setGroups(ex.sets).map(g=>`<span class="sp">${esc(g.l)}<i>${g.n}세트</i></span>`).join('')||'<span class="faint">기록 없음</span>'}</div></td>
+      </tr>`).join('')}</tbody></table>
+      ${s.memo?`<div class="memo-line">${esc(s.memo.split('\n')[0])}</div>`:''}
     </div>`;}).join('')}</div>`;
 }
 function autoOpenEx(d){
@@ -1626,7 +1645,7 @@ window.addEventListener('beforeunload',e=>{ const d=state.memberId&&state.drafts
    ========================================================= */
 function addSample(){
   const mid=uid();
-  DB.members.push({id:mid,name:'김샘플',gender:'여',birthYear:'1968',job:'식당 운영 (오래 서서 일함)',regCount:30,monthGoal:'고관절 기능 강화와 스트레칭, 무릎은 천천히 접근',purpose:'건강 - 무릎, 허리 통증 개선',freq:'주 2회',sleep:'6시간, 자주 깸',diet:'불규칙, 저녁 늦게 식사',visit:'지인 소개',medical:'좌측 무릎 관절염 2기 (통증 3년)',special:'좌측 햄스트링·내전근 긴장, 둔근 약화',caution:'깊게 앉았다 일어날 때 좌측 무릎 오금 통증, 허리 뻐근함',painArea:'좌측 무릎',painMove:'계단 내려가기',breathing:'흉식 호흡 우세',createdAt:new Date().toISOString()});
+  DB.members.push({id:mid,name:'테스트 회원',gender:'여',birthYear:'1968',job:'식당 운영 (오래 서서 일함)',regCount:30,monthGoal:'고관절 기능 강화와 스트레칭, 무릎은 천천히 접근',purpose:'건강 - 무릎, 허리 통증 개선',freq:'주 2회',sleep:'6시간, 자주 깸',diet:'불규칙, 저녁 늦게 식사',visit:'지인 소개',medical:'좌측 무릎 관절염 2기 (통증 3년)',special:'좌측 햄스트링·내전근 긴장, 둔근 약화',caution:'깊게 앉았다 일어날 때 좌측 무릎 오금 통증, 허리 뻐근함',painArea:'좌측 무릎',painMove:'계단 내려가기',breathing:'흉식 호흡 우세',createdAt:new Date().toISOString()});
   const plan=[
     ['힙 브릿지','','하체',(k)=>[[10+k*2.5,15],[10+k*2.5,15],[10+k*2.5,12]]],
     ['힙 에이비덕션','밴드2','하체',(k)=>[['빨강',17],['빨강',16],['빨강',15]]],
@@ -1667,6 +1686,8 @@ async function init(){
   pill.textContent=IS_GAS?'구글 시트 연결':'테스트 모드 · 이 기기에만 저장'; pill.className='mode-pill'+(IS_GAS?' gas':'');
   try{ DB=await API.loadAll(); }
   catch(e){ $('#app').innerHTML=`<div class="card empty">기록을 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침하세요.<br><small>${esc(e&&e.message||e)}</small></div>`; return; }
+  // 테스트 모드(파일로 직접 연 경우)에서 회원이 하나도 없으면 테스트 회원 데이터를 넣어 둡니다.
+  if(!IS_GAS && !DB.members.length && !store('ptlog_sample_done')){ ensureDefaults(); addSample(); persistLocal(); store('ptlog_sample_done','1'); }
   if(ensureDefaults()){ try{ if(IS_GAS){ await gasCall('saveCatalog',DB.catalog); await gasCall('saveSettings',DB.settings); } else persistLocal(); }catch(e){} }
   render();
 }
