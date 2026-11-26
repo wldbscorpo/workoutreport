@@ -378,13 +378,15 @@ button.chip{min-height:30px}
 #exList.two .seg button::after{content:attr(data-s);font-size:13.5px}
 #exList.two .cnt .input{width:48px;padding:8px 2px;font-size:15px}
 #exList.two .timer-btn{width:34px}
-#exList.two .icon-btn.copy,#exList.two .icon-btn.del{width:26px}
-#exList.two .set-row{grid-template-columns:16px minmax(0,1fr) auto auto 26px 26px}
+#exList.two .icon-btn.copy,#exList.two .icon-btn.del{width:34px;height:44px}
+#exList.two .set-row{grid-template-columns:16px minmax(0,1fr) auto auto 34px 34px}
 #exList.two .ex-foot .btn{flex:1}
 #exList.two .ex-foot span{display:none}
 #exList.two .ex-mini{flex-wrap:wrap;row-gap:2px;align-items:center}
 #exList.two .ex-mini .mn{max-width:none;flex:1}
 #exList.two .ex-mini .ms{order:5;flex:1 0 100%;padding-left:38px}
+.ib-editing{border:2px solid var(--accent)}
+.app-ver{display:block;text-align:center;font-size:12px;color:var(--ink-3);padding:18px 0 4px}
 .loading{display:grid;place-items:center;min-height:60vh;color:var(--ink-3)}
 </style>
 </head>
@@ -404,6 +406,8 @@ button.chip{min-height:30px}
 /* =========================================================
    기본 데이터
    ========================================================= */
+// 버전 기록은 CHANGELOG.md 참고
+const APP_VERSION = 'v2.1';
 const PARTS = ['가슴','등','어깨','이두','삼두','하체','복부','옆구리'];
 const OTHER_PARTS = ['스트레칭','기능성','전신코어'];
 const ALL_PARTS = PARTS.concat(OTHER_PARTS);
@@ -415,7 +419,7 @@ const DEFAULT_BANDS = [
 ];
 const DEFAULT_TESTS = ['토마스','아담스','흉추회전','광배길이','대흉근','소흉근','하부승모','전거근','딥스쿼트','하체유연성','푸쉬업','풀다운견갑'];
 const LEVELS = ['정상','제한'];
-const NOTE_SUGGEST = ['밴드1','밴드2','밴드3','밴드4','블럭','볼','보수','메디신볼','슬라이더','스미스','케이블','덤벨','바벨','원레그','원암','원핸드','행잉','+스트레칭','+pnf','+흉추','전사','좌측','우측','범위 작게'];
+const NOTE_SUGGEST = ['밴드1','밴드2','밴드3','밴드4','블럭','볼','보수','메디신볼','슬라이더','스미스','케이블','덤벨','바벨','원레그','원암','원핸드','행잉','+스트레칭','+버드독','+pnf','+흉추','전사','좌측','우측','범위 작게'];
 const CATALOG_SRC = {
   '하체':'스쿼트,퍼펙트 스쿼트,행잉 스쿼트,스플릿 스쿼트,사이드 스플릿 스쿼트,불가리안 스플릿 스쿼트,케이블 로우 스쿼트,TRX 스쿼트,고블릿 스쿼트,런지,백 런지,사이드 런지,레그 프레스,레그 익스텐션,레그 컬,힙 브릿지,원레그 힙 브릿지,힙 쓰러스트,힙 어덕션,힙 에이비덕션,크램쉘,카프 레이즈,카프 토 레이즈,데드리프트,루마니안 데드리프트,원레그 데드리프트,원레그 스티프 데드리프트,굿모닝,리버스 노르딕,스텝 다운,원레그 슬라이더,발등 굴곡 운동,발목 굴곡 운동,프론트 레그레이즈,사이드 레그레이즈',
   '등':'케이블 로우,케이블 원암 로우,시티드 로우,벤트오버 로우,원암 덤벨 로우,랫 풀다운,풀다운,풀업,백 익스텐션,슈퍼맨',
@@ -595,7 +599,7 @@ function memberExercises(mid){
    상태
    ========================================================= */
 const state = {view:'members', memberId:null, tab:'session', q:'', drafts:{}, focusEx:null, openEx:null,
-  trend:{preset:'3m',from:'',to:'',ex:''}, hist:{ex:''}, evalEdit:null, cmp:{a:'',b:''}, report:{from:'',to:'',comment:''}, catQ:''};
+  trend:{preset:'3m',from:'',to:'',ex:''}, hist:{ex:''}, evalEdit:null, ibEdit:null, cmp:{a:'',b:''}, report:{from:'',to:'',comment:''}, catQ:''};
 const member = () => DB.members.find(m=>m.id===state.memberId);
 
 /* =========================================================
@@ -1219,17 +1223,18 @@ const INBODY=[{k:'weight',l:'체중',u:'kg'},{k:'smm',l:'골격근량',u:'kg'},{
 function memberInbody(mid){ return DB.inbody.filter(r=>r.memberId===mid).sort((a,b)=>a.date.localeCompare(b.date)); }
 function viewInbody(){
   const m=member(); const rs=memberInbody(m.id);
+  const ed=state.ibEdit?rs.find(r=>r.id===state.ibEdit):null; if(!ed) state.ibEdit=null;
   return `<div class="stack">
-    <div class="card card-pad"><div class="section-title"><h3>측정 추가</h3></div>
+    <div class="card card-pad ${ed?'ib-editing':''}"><div class="section-title"><h3>${ed?`측정 수정 · ${fmtDate(ed.date)}`:'측정 추가'}</h3></div>
       <div class="row" style="align-items:flex-end;gap:12px">
-        <div class="field" style="width:170px"><label>측정일</label><input type="date" class="input" id="ib-date" value="${today()}"></div>
-        ${INBODY.map(f=>`<div class="field" style="width:118px"><label>${f.l}${f.u?` (${f.u})`:''}</label><input class="input num" inputmode="decimal" id="ib-${f.k}"></div>`).join('')}
-        <button class="btn primary" data-act="addInbody">추가</button>
+        <div class="field" style="width:170px"><label>측정일</label><input type="date" class="input" id="ib-date" value="${ed?esc(ed.date):today()}"></div>
+        ${INBODY.map(f=>`<div class="field" style="width:118px"><label>${f.l}${f.u?` (${f.u})`:''}</label><input class="input num" inputmode="decimal" id="ib-${f.k}" value="${ed?esc(ed[f.k]):''}"></div>`).join('')}
+        ${ed?`<button class="btn" data-act="cancelInbody">취소</button><button class="btn primary" data-act="addInbody">수정 저장</button>`:`<button class="btn primary" data-act="addInbody">추가</button>`}
       </div></div>
     ${rs.length?`<div class="mini-charts">${INBODY.map(f=>{const pts=rs.filter(r=>r[f.k]!=='');if(!pts.length) return `<div class="mini"><div class="mh"><span>${f.l}</span><span class="faint">기록 없음</span></div></div>`;const first=pts[0][f.k],last=pts[pts.length-1][f.k],dv=Math.round((last-first)*10)/10;
       return `<div class="mini"><div class="mh"><span>${f.l}</span><span class="num">${fmt1(last)}${f.u} ${pts.length>1?`<span style="font-size:12.5px" class="${dv===0?'faint':''}">(${signed(dv)})</span>`:''}</span></div>${svgLines(pts.map(r=>shortDate(r.date)),[{name:f.l,color:'#1f3a5f',values:pts.map(r=>r[f.k])}],{h:200,w:400,title:f.l})}</div>`;}).join('')}</div>
     <div class="card card-pad"><div class="section-title"><h3>측정 기록</h3><span class="faint" style="font-size:13px">괄호 안은 처음 측정 대비</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>측정일</th>${INBODY.map(f=>`<th class="r">${f.l}</th>`).join('')}<th></th></tr></thead><tbody>
-      ${rs.slice().reverse().map(r=>`<tr><td>${fmtDate(r.date)}</td>${INBODY.map(f=>{const first=(rs.find(x=>x[f.k]!=='')||{})[f.k]; const v=r[f.k]; const dv=(v!==''&&first!==undefined&&first!=='')?Math.round((v-first)*10)/10:null; return `<td class="r num">${v===''?'—':fmt1(v)}${dv?` <span class="faint" style="font-size:12px">(${signed(dv)})</span>`:''}</td>`;}).join('')}<td class="r"><button class="icon-btn" data-act="delInbody" data-id="${r.id}" aria-label="삭제">✕</button></td></tr>`).join('')}
+      ${rs.slice().reverse().map(r=>`<tr><td>${fmtDate(r.date)}</td>${INBODY.map(f=>{const first=(rs.find(x=>x[f.k]!=='')||{})[f.k]; const v=r[f.k]; const dv=(v!==''&&first!==undefined&&first!=='')?Math.round((v-first)*10)/10:null; return `<td class="r num">${v===''?'—':fmt1(v)}${dv?` <span class="faint" style="font-size:12px">(${signed(dv)})</span>`:''}</td>`;}).join('')}<td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-act="editInbody" data-id="${r.id}">수정</button><button class="icon-btn" data-act="delInbody" data-id="${r.id}" aria-label="삭제">✕</button></td></tr>`).join('')}
     </tbody></table></div></div>`
     :`<div class="card empty">측정 기록이 없습니다.</div>`}
   </div>`;
@@ -1295,7 +1300,7 @@ function viewReport(){
       <div class="row"><div class="field" style="width:170px"><label>시작일</label><input type="date" class="input" data-bind="repFrom" value="${rp.from}"></div><span style="margin-top:22px">~</span><div class="field" style="width:170px"><label>종료일</label><input type="date" class="input" data-bind="repTo" value="${rp.to}"></div></div>
       <div class="seg-chips">${[['1','최근 1개월'],['3','최근 3개월'],['m','이번 달'],['pm','지난 달']].map(([k,l])=>`<button data-act="repPreset" data-v="${k}">${l}</button>`).join('')}</div>
       <div class="field"><label>트레이너 코멘트</label><textarea class="input" rows="5" data-bind="repComment" placeholder="이번 기간 회원님의 변화와 다음 목표를 적어 주세요.">${esc(rp.comment)}</textarea></div>
-      <div class="muted" style="font-size:13.5px;background:var(--surface-2);border-radius:10px;padding:10px 12px">보고서에는 <b>운동량 변화, 부위별 볼륨, 인바디 변화, 트레이너 코멘트</b>만 들어갑니다. 기본 정보(병력·주의사항·특이사항·상담·평가)와 수업 메모는 들어가지 않습니다.</div>
+      <div class="muted" style="font-size:13.5px;background:var(--surface-2);border-radius:10px;padding:10px 12px">보고서에는 <b>운동량 변화, 부위별 볼륨, 인바디 변화, 트레이너 코멘트</b>만 들어갑니다. 기본 정보(부상 및 병력·주의사항·특이사항·방문경로·상담·평가)와 수업 메모는 들어가지 않습니다.</div>
       <div class="row"><button class="btn primary" data-act="repShare">공유 (카톡 등)</button><button class="btn" data-act="repDownload">이미지 저장</button></div>
       <p class="faint" style="font-size:12.5px;margin:0">공유나 저장이 안 되면 오른쪽 미리보기 이미지를 길게 눌러 저장하세요.</p>
     </div>
@@ -1449,7 +1454,8 @@ function viewSettings(){
           </div>
         </div>
       </div>
-    </div></div>`;
+    </div></div>
+    <span class="app-ver">PT 운동기록 ${APP_VERSION}</span>`;
 }
 
 /* =========================================================
@@ -1469,7 +1475,7 @@ const ACT = {
       go('member',{memberId:mm.id,tab:'info'});
     });
   },
-  openMember(t){ state.focusEx=null; state.openEx=null; state.evalEdit=null; state.hist.ex=''; state.trend.ex=''; state.report={from:'',to:'',comment:''}; go('member',{memberId:t.dataset.id,tab:'session'}); },
+  openMember(t){ state.focusEx=null; state.openEx=null; state.evalEdit=null; state.ibEdit=null; state.hist.ex=''; state.trend.ex=''; state.report={from:'',to:'',comment:''}; go('member',{memberId:t.dataset.id,tab:'session'}); },
   tab(t){ state.tab=t.dataset.tab; state.evalEdit=null; if(state.tab==='session'){ state.openEx=null; state.focusEx=null; } $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab)); renderTab(); },
   'modal-ok': async ()=>{ const cb=modalCb; if(!cb){ closeModal(); return; } const r=await cb(true); if(r!==false && modalCb===cb) closeModal(); },
   'modal-cancel'(){ const cb=modalCb; closeModal(); if(cb) cb(false); },
@@ -1538,11 +1544,17 @@ const ACT = {
 
   /* 인바디 */
   async addInbody(){
-    const rec={id:uid(),memberId:state.memberId,date:$('#ib-date').value||today()};
+    const editId=state.ibEdit;
+    const rec={id:editId||uid(),memberId:state.memberId,date:$('#ib-date').value||today()};
     let any=false; INBODY.forEach(f=>{ const v=$('#ib-'+f.k).value.trim().replace(',','.'); rec[f.k]=v===''||isNaN(+v)?'':+v; if(rec[f.k]!=='') any=true; });
     if(!any){ toast('측정값을 하나 이상 입력하세요.','err'); return; }
-    DB.inbody.push(rec); try{ await API.saveInbody(rec); }catch(e){} renderTab(); toast('측정 기록을 추가했습니다.'); },
-  async delInbody(t){ if(!(await confirmBox('이 측정 기록을 삭제할까요?','삭제',true))) return; DB.inbody=DB.inbody.filter(r=>r.id!==t.dataset.id); try{ await API.deleteInbody(t.dataset.id);}catch(e){} renderTab(); },
+    const k=DB.inbody.findIndex(r=>r.id===rec.id);
+    if(k>=0) DB.inbody[k]=rec; else DB.inbody.push(rec);
+    state.ibEdit=null;
+    try{ await API.saveInbody(rec); }catch(e){} renderTab(); toast(editId?'측정 기록을 수정했습니다.':'측정 기록을 추가했습니다.'); },
+  editInbody(t){ state.ibEdit=t.dataset.id; renderTab(); window.scrollTo({top:0,behavior:'smooth'}); },
+  cancelInbody(){ state.ibEdit=null; renderTab(); },
+  async delInbody(t){ if(!(await confirmBox('이 측정 기록을 삭제할까요?','삭제',true))) return; if(state.ibEdit===t.dataset.id) state.ibEdit=null; DB.inbody=DB.inbody.filter(r=>r.id!==t.dataset.id); try{ await API.deleteInbody(t.dataset.id);}catch(e){} renderTab(); },
 
   /* 기본 정보 */
   async saveInfo(){
