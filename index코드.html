@@ -388,6 +388,11 @@ button.chip{min-height:30px}
 .ib-editing{border:2px solid var(--accent)}
 .app-ver{display:block;text-align:center;font-size:12px;color:var(--ink-3);padding:18px 0 4px}
 .loading{display:grid;place-items:center;min-height:60vh;color:var(--ink-3)}
+/* 전체화면 (v2.2) */
+.fs-btn .fs-ico{font-size:16px;line-height:1}
+html:fullscreen{background:var(--bg);overflow-y:auto}
+html:-webkit-full-screen{background:var(--bg);overflow-y:auto}
+@media (max-width:620px){ .fs-btn .fs-lbl{display:none} }
 </style>
 </head>
 <body>
@@ -396,6 +401,7 @@ button.chip{min-height:30px}
   <div class="spacer"></div>
   <span id="modePill" class="mode-pill"></span>
   <span id="saveState" class="save-state"></span>
+  <button id="fsBtn" class="btn sm ghost fs-btn hidden" type="button" title="전체화면" aria-label="전체화면" aria-pressed="false"><span class="fs-ico">⛶</span><span class="fs-lbl">전체화면</span></button>
   <button class="btn sm ghost" data-act="home">회원 목록</button>
   <button class="btn sm ghost" data-act="settings">설정</button>
 </header>
@@ -407,7 +413,7 @@ button.chip{min-height:30px}
    기본 데이터
    ========================================================= */
 // 버전 기록은 CHANGELOG.md 참고
-const APP_VERSION = 'v2.1';
+const APP_VERSION = 'v2.2';
 const PARTS = ['가슴','등','어깨','이두','삼두','하체','복부','옆구리'];
 const OTHER_PARTS = ['스트레칭','기능성','전신코어'];
 const ALL_PARTS = PARTS.concat(OTHER_PARTS);
@@ -646,6 +652,29 @@ function render(){
     app.innerHTML=viewMemberShell();
     renderTab();
   }
+}
+// 검색창에 입력할 때: 검색창 요소는 그대로 두고 나머지만 새로 그립니다. (v2.2)
+// 검색창을 새로 만들면 한글 조합이 끊겨 자음·모음이 따로 입력되기 때문입니다.
+// 화면 구조가 예상과 다르면 false를 돌려주고, 호출한 쪽이 예전처럼 전체를 다시 그립니다.
+function renderKeepInput(inp){
+  try{
+    const app=$('#app');
+    const html = state.view==='members'?viewMembers(): state.view==='settings'?viewSettings(): null;
+    if(html==null||!inp||!app.contains(inp)) return false;
+    const tmp=document.createElement('div'); tmp.innerHTML=html;
+    const path=[]; for(let n=inp; n!==app; n=n.parentNode) path.unshift(Array.prototype.indexOf.call(n.parentNode.childNodes,n));
+    let f=tmp; for(const i of path){ f=f.childNodes[i]; if(!f) return false; }
+    if(f.nodeName!==inp.nodeName||f.getAttribute('data-bind')!==inp.getAttribute('data-bind')) return false;
+    closePop();
+    let live=app, fresh=tmp;
+    for(const i of path){
+      const lc=Array.from(live.childNodes), fc=Array.from(fresh.childNodes);
+      if(lc.length!==fc.length) return false;
+      lc.forEach((n,k)=>{ if(k!==i) live.replaceChild(fc[k],n); });
+      live=lc[i]; fresh=fc[i];
+    }
+    return true;
+  }catch(e){ return false; }
 }
 function go(view,extra){ Object.assign(state,{view},extra||{}); render(); window.scrollTo(0,0); }
 
@@ -1455,7 +1484,8 @@ function viewSettings(){
         </div>
       </div>
     </div></div>
-    <span class="app-ver">PT 운동기록 ${APP_VERSION}</span>`;
+    <span class="app-ver">PT 운동기록 ${APP_VERSION}</span>
+    <span class="app-ver" style="padding-top:0">전체화면 버튼: ${FS.ok?'사용 가능':'이 화면에서는 사용할 수 없음'}</span>`;
 }
 
 /* =========================================================
@@ -1680,8 +1710,8 @@ document.addEventListener('input',e=>{
     markDirty(); return;
   }
   const b=t.dataset.bind; if(!b) return;
-  if(b==='q'){ state.q=t.value; const pos=t.selectionStart; render(); const el=$('[data-bind="q"]'); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(err){} } }
-  else if(b==='catQ'){ state.catQ=t.value; const pos=t.selectionStart; render(); const el=$('[data-bind="catQ"]'); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(err){} } }
+  if(b==='q'){ state.q=t.value; if(renderKeepInput(t)) return; const pos=t.selectionStart; render(); const el=$('[data-bind="q"]'); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(err){} } }
+  else if(b==='catQ'){ state.catQ=t.value; if(renderKeepInput(t)) return; const pos=t.selectionStart; render(); const el=$('[data-bind="catQ"]'); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(err){} } }
   else if(b==='evalNote'){ const ee=state.evalEdit; ee.items[t.dataset.t]=ee.items[t.dataset.t]||{}; ee.items[t.dataset.t].note=t.value; }
   else if(b==='evalMemo'){ state.evalEdit.memo=t.value; }
   else if(b==='repComment'){ state.report.comment=t.value; drawReportPreview(); }
@@ -1754,6 +1784,41 @@ async function init(){
   if(ensureDefaults()){ try{ if(IS_GAS){ await gasCall('saveCatalog',DB.catalog); await gasCall('saveSettings',DB.settings); } else persistLocal(); }catch(e){} }
   render();
 }
+/* =========================================================
+   전체화면 (v2.2)
+   - 브라우저가 허용할 때만 상단에 버튼을 보입니다.
+   - 구글 Apps Script 화면처럼 막혀 있으면 버튼을 숨기고, 다른 기능에는 손대지 않습니다.
+   ========================================================= */
+const FS = (function(){
+  const d=document, el=d.documentElement, st={ok:false};
+  try{
+    const req=el.requestFullscreen||el.webkitRequestFullscreen;
+    const exit=d.exitFullscreen||d.webkitExitFullscreen;
+    const cur=()=>d.fullscreenElement||d.webkitFullscreenElement||null;
+    st.ok=!!(req && exit && (d.fullscreenEnabled||d.webkitFullscreenEnabled));
+    const btn=d.getElementById('fsBtn');
+    if(!st.ok||!btn) return st;
+    const sync=()=>{
+      const on=!!cur();
+      btn.querySelector('.fs-ico').textContent=on?'✕':'⛶';
+      btn.querySelector('.fs-lbl').textContent=on?'전체화면 끄기':'전체화면';
+      btn.title=on?'전체화면 끄기':'전체화면';
+      btn.setAttribute('aria-label',btn.title);
+      btn.setAttribute('aria-pressed',on?'true':'false');
+    };
+    btn.addEventListener('click',()=>{
+      try{
+        const r=cur()?exit.call(d):req.call(el);
+        if(r&&typeof r.catch==='function') r.catch(()=>toast('이 화면에서는 전체화면을 열 수 없습니다.','err'));
+      }catch(e){ toast('이 화면에서는 전체화면을 열 수 없습니다.','err'); }
+    });
+    d.addEventListener('fullscreenchange',sync);
+    d.addEventListener('webkitfullscreenchange',sync);
+    btn.classList.remove('hidden');
+    sync();
+  }catch(e){ st.ok=false; }
+  return st;
+})();
 init();
 </script>
 </body>
